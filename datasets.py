@@ -1,14 +1,14 @@
-import torch_geometric
+import torch_geometric as pyg
 import torch
 import os
 from glob import glob
 import h5py
 from tqdm import tqdm
-from data import Data
+from torch_geometric.data import Data
 from pathlib import Path
 
 
-class Dataset(torch_geometric.data.Dataset):
+class Dataset(pyg.data.Dataset):
     def __init__(self, root, transform=None, pre_transform=None, pre_filter=None):
         super().__init__(root, transform, pre_transform, pre_filter)
 

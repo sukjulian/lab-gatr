@@ -1,10 +1,10 @@
 from argparse import ArgumentParser
 
-from transforms import PointCloudPoolingScales
+from lab_gatr.transforms import PointCloudPoolingScales
 import torch_geometric as pyg
 from datasets import Dataset
 import wandb_impostor as wandb
-from models import LaBGATr
+from lab_gatr import LaBGATr
 import torch
 from torch_cluster import knn
 from gatr.interface import embed_point, embed_oriented_plane, extract_translation
@@ -61,7 +61,7 @@ def main(rank, num_gpus):
     training_device = torch.device(f'cuda:{rank}')
     neural_network.to(training_device)
 
-    load_neural_network_weights(neural_network, working_directory=f"lab-gatr{'-' if args.run_id else ''}{args.run_id or ''}")
+    load_neural_network_weights(neural_network, working_directory=f"exp{'-' if args.run_id else ''}{args.run_id or ''}")
 
     # Distributed data parallel (multi-GPU training)
     neural_network = ddp_module(neural_network, rank)
@@ -73,7 +73,7 @@ def main(rank, num_gpus):
         training_device,
         training_data_loader,
         validation_data_loader,
-        working_directory=f"lab-gatr{'-' if args.run_id else ''}{args.run_id or ''}"
+        working_directory=f"exp{'-' if args.run_id else ''}{args.run_id or ''}"
     )
 
     ddp_rank_zero(
@@ -83,7 +83,7 @@ def main(rank, num_gpus):
         dataset=dataset,
         test_dataset_slice=test_dataset_slice,
         visualisation_dataset_range=visualisation_dataset_range,
-        working_directory=f"lab-gatr{'-' if args.run_id else ''}{args.run_id or ''}"
+        working_directory=f"exp{'-' if args.run_id else ''}{args.run_id or ''}"
     )
 
     ddp_cleanup()

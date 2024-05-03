@@ -1,6 +1,6 @@
 import torch_geometric as pyg
 import torch
-from data import Data
+from lab_gatr.data import Data
 from torch_geometric.nn.conv import MessagePassing
 
 

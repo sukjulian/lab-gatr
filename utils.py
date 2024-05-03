@@ -1,10 +1,6 @@
 import torch
 from torch_scatter import scatter
 from prettytable import PrettyTable
-import pandas
-import matplotlib.pyplot as plt
-import seaborn
-from scipy.stats import linregress
 
 
 class AccuracyAnalysis():

@@ -1,14 +1,13 @@
 import torch
 import gatr
-from nn.class_token import class_token_forward_wrapper
+from .nn.class_token import class_token_forward_wrapper
 from typing import Callable
-from data import Data
+from .data import Data
 from xformers.ops.fmha import BlockDiagonalMask
 
-from nn.mlp.geometric_algebra import MLP
-from nn.gnn import pool
+from .nn.mlp.geometric_algebra import MLP
+from .nn.gnn import pool, PointCloudPooling
 from torch_scatter import scatter
-import nn.gnn
 from gatr.interface import embed_translation
 
 
@@ -47,56 +46,14 @@ class LaBGATr(torch.nn.Module):
             num_blocks=num_blocks,
             dropout_prob=dropout_probability
         )
-        self.gatr.forward = self.gatr_dual_reference_forward
 
         if use_class_token:
             self.gatr.forward = class_token_forward_wrapper(self.gatr.forward)
 
         self.num_attn_heads = num_attn_heads
 
-        print(f"LaB-GATr ({sum(parameter.numel() for parameter in self.parameters() if parameter.requires_grad)} parameters)")
-
-    # Made redundant by patch to GATr repository (will change soon)
-    def gatr_dual_reference_forward(
-        self,
-        multivectors: torch.Tensor,
-        scalars=None,
-        attention_mask=None,
-        reference_multivector=None
-    ) -> torch.Tensor:
-
-        additional_qk_features_mv, additional_qk_features_s = self.gatr._construct_reinserted_channels(multivectors, scalars)
-
-        h_mv, h_s = self.gatr.linear_in(multivectors, scalars=scalars)
-
-        for block in self.gatr.blocks:
-            if self.gatr._checkpoint_blocks:
-
-                h_mv, h_s = checkpoint(
-                    block,
-                    h_mv,
-                    use_reentrant=False,
-                    scalars=h_s,
-                    reference_mv=reference_multivector,
-                    additional_qk_features_mv=additional_qk_features_mv,
-                    additional_qk_features_s=additional_qk_features_s,
-                    attention_mask=attention_mask,
-                )
-
-            else:
-
-                h_mv, h_s = block(
-                    h_mv,
-                    scalars=h_s,
-                    reference_mv=reference_multivector,
-                    additional_qk_features_mv=additional_qk_features_mv,
-                    additional_qk_features_s=additional_qk_features_s,
-                    attention_mask=attention_mask,
-                )
-
-        outputs_mv, outputs_s = self.gatr.linear_out(h_mv, scalars=h_s)
-
-        return outputs_mv, outputs_s
+        self.num_parameters = sum(parameter.numel() for parameter in self.parameters() if parameter.requires_grad)
+        print(f"LaB-GATr ({self.num_parameters} parameters)")
 
     def forward(self, data: Data) -> torch.Tensor:
         multivectors, scalars, reference_multivector = self.tokeniser(data)
@@ -105,7 +62,7 @@ class LaBGATr(torch.nn.Module):
             multivectors,
             scalars=scalars,
             attention_mask=self.get_attn_mask(data),
-            reference_multivector=reference_multivector
+            join_reference=reference_multivector
         )
 
         return self.tokeniser.lift(multivectors, scalars)
@@ -244,7 +201,7 @@ class Tokeniser(torch.nn.Module):
         return mlp(multivectors, scalars, reference_mv=reference_multivector)
 
 
-class PointCloudPooling(nn.gnn.PointCloudPooling):
+class PointCloudPooling(PointCloudPooling):
 
     def message(
         self,
