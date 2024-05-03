@@ -3,22 +3,22 @@
 
 ## Installation
 We recommend creating a new Anaconda environment:
-```
+```shell
 conda create --name lab-gatr python=3.10
 conda activate lab-gatr
 ```
 Next, install PyTorch and xFormers depending on your system. In our case, this was
-```
+```shell
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 pip install xformers==0.0.22.post7 --index-url https://download.pytorch.org/whl/cu121
 ```
 Additonally, we need Pytorch Geometric (currently only v2.4.0) and some dependencies
-```
+```shell
 pip install torch_geometric==2.4.0
 pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.0+cu121.html
 ```
 You can now install `lab_gatr` (which also installs [`gatr`](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)) via
-```
+```shell
 pip install .
 ```
 from within this repository.
@@ -30,7 +30,7 @@ pip install h5py prettytable meshio
 LaB-GATr requires two things: a point cloud pooling transform for the tokenisation (patching) and a geometric algebra interface to embed your data in $\mathbf{G}(3, 0, 1)$. In the following we provide a minimal working example.
 
 Let us first create a dummy mesh: n positions and orientations (e.g. surface normal) and an arbitrary scalar feature (e.g. geodesic distance).
-```
+```python
 import torch
 
 n = 10000
@@ -39,7 +39,7 @@ pos, orientation = torch.rand((n, 3)), torch.rand((n, 3))
 scalar_feature = torch.rand(n)
 ```
 We need to compute auxiliary tensors that will be used during tokenisation (patching). We use Pytorch Geometric.
-```
+```python
 from lab_gatr import PointCloudPoolingScales
 import torch_geometric as pyg
 
@@ -47,7 +47,7 @@ transform = PointCloudPoolingScales(rel_sampling_ratios=(0.2,), interp_simplex='
 data = transform(pyg.data.Data(pos=pos, orientation=orientation, scalar_feature=scalar_feature))
 ```
 Next, we define the embedding of our data in $\mathbf{G}(3, 0, 1)$. This means setting the number of input and output channels plus some logic that wraps around the model. We package this interface as Python class for convenience.
-```
+```python
 from gatr.interface import embed_oriented_plane, extract_translation
 
 class GeometricAlgebraInterface:
@@ -70,7 +70,7 @@ class GeometricAlgebraInterface:
         return output
 ```
 That's it! With the interface class we just defined, we can create the model and run inference.
-```
+```python
 from lab_gatr import LaBGATr
 
 model = LaBGATr(GeometricAlgebraInterface, d_model=8, num_blocks=10, num_attn_heads=4, use_class_token=False)
