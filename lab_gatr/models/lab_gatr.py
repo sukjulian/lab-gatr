@@ -1,12 +1,11 @@
 import torch
 import gatr
-from .nn.class_token import class_token_forward_wrapper
-from typing import Callable
-from .data import Data
+from lab_gatr.nn.class_token import class_token_forward_wrapper
+from lab_gatr.data import Data
 from xformers.ops.fmha import BlockDiagonalMask
 
-from .nn.mlp.geometric_algebra import MLP
-from .nn.gnn import pool, PointCloudPooling
+from lab_gatr.nn.mlp.geometric_algebra import MLP
+from lab_gatr.nn.gnn import PointCloudPooling, pool
 from torch_scatter import scatter
 from gatr.interface import embed_translation
 
@@ -49,8 +48,6 @@ class LaBGATr(torch.nn.Module):
 
         if use_class_token:
             self.gatr.forward = class_token_forward_wrapper(self.gatr.forward)
-
-        self.num_attn_heads = num_attn_heads
 
         self.num_parameters = sum(parameter.numel() for parameter in self.parameters() if parameter.requires_grad)
         print(f"LaB-GATr ({self.num_parameters} parameters)")
@@ -237,7 +234,7 @@ def interp(
     data: Data,
     scale_id: int,
     reference_multivector: torch.Tensor
-):
+) -> torch.Tensor:
 
     pos_diff = pos_source[data[f'scale{scale_id}_interp_source']] - pos_target[data[f'scale{scale_id}_interp_target']]
     squared_pos_dist = torch.clamp(torch.sum(pos_diff ** 2, dim=-1), min=1e-16).view(-1, 1, 1)

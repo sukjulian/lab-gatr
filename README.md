@@ -23,11 +23,6 @@ pip install .
 ```
 from within this repository.
 
-To run `main.py` we also need some util:
-```shell
-pip install h5py prettytable meshio
-```
-
 ## Getting started
 LaB-GATr requires two things: a point cloud pooling transform for the tokenisation (patching) and a geometric algebra interface to embed your data in $\mathbf{G}(3, 0, 1)$. In the following we provide a minimal working example.
 

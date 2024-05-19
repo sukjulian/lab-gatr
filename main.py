@@ -5,6 +5,7 @@ import torch_geometric as pyg
 from datasets import Dataset
 import wandb_impostor as wandb
 from lab_gatr import LaBGATr
+# from lab_gatr.models import LaBVaTr  # geometric algbera ablated LaB-GATr
 import torch
 from torch_cluster import knn
 from gatr.interface import embed_point, embed_oriented_plane, extract_translation
@@ -56,7 +57,8 @@ def main(rank, num_gpus):
     test_dataset_slice = slice(18, 20)
     visualisation_dataset_range = range(18, 20)
 
-    neural_network = LaBGATr(GeometricAlgebraInterface, d_model=8, num_blocks=10, num_attn_heads=4, use_class_token=False)
+    neural_network = LaBGATr(GeometricAlgebraInterface, d_model=8, num_blocks=10, num_attn_heads=4)
+    # neural_network = LaBVaTr(num_input_channels=12, num_output_channels=3, d_model=128, num_blocks=12, num_attn_heads=8)
 
     training_device = torch.device(f'cuda:{rank}')
     neural_network.to(training_device)
