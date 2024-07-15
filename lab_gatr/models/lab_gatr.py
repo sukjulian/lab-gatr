@@ -2,12 +2,16 @@ import torch
 import gatr
 from lab_gatr.nn.class_token import class_token_forward_wrapper
 from lab_gatr.data import Data
-from xformers.ops.fmha import BlockDiagonalMask
+from lab_gatr.nn.attn_mask import get_attn_mask
 
 from lab_gatr.nn.mlp.geometric_algebra import MLP
 from lab_gatr.nn.gnn import PointCloudPooling, pool
 from torch_scatter import scatter
 from gatr.interface import embed_translation
+
+from gatr.layers.linear import EquiLinear
+from lab_gatr.nn.blocks import GATrCrossAttentionBlock
+from gatr.utils.tensors import construct_reference_multivector
 
 
 class LaBGATr(torch.nn.Module):
@@ -20,18 +24,29 @@ class LaBGATr(torch.nn.Module):
         num_attn_heads: int,
         num_latent_channels=None,
         use_class_token: bool = False,
-        dropout_probability=None
+        dropout_probability=None,
+        pooling_mode: str = 'cross_attention'
     ):
         super().__init__()
 
         num_latent_channels = num_latent_channels or d_model
 
-        self.tokeniser = Tokeniser(
-            geometric_algebra_interface,
-            d_model,
-            num_latent_channels=4 * num_latent_channels,
-            dropout_probability=dropout_probability
-        )
+        match pooling_mode:
+            case 'message_passing':
+                self.tokeniser = Tokeniser(
+                    geometric_algebra_interface,
+                    d_model,
+                    num_latent_channels=4 * num_latent_channels,
+                    dropout_probability=dropout_probability
+                )
+            case 'cross_attention':
+                self.tokeniser = CrossAttentionTokeniser(
+                    geometric_algebra_interface,
+                    d_model,
+                    num_attn_heads,
+                    num_latent_channels=4 * num_latent_channels,
+                    dropout_probability=dropout_probability
+                )
 
         self.gatr = gatr.GATr(
             in_mv_channels=d_model,
@@ -58,23 +73,11 @@ class LaBGATr(torch.nn.Module):
         multivectors, scalars = self.gatr(
             multivectors,
             scalars=scalars,
-            attention_mask=self.get_attn_mask(data),
+            attention_mask=get_attn_mask(data.batch[data.scale0_sampling_index] if data.batch is not None else data.batch),
             join_reference=reference_multivector
         )
 
         return self.tokeniser.lift(multivectors, scalars)
-
-    @staticmethod
-    def get_attn_mask(data: Data):
-
-        if data.batch is None:
-            attn_mask = None
-
-        else:
-            batch = data.batch[data.scale0_sampling_index]
-            attn_mask = BlockDiagonalMask.from_seqlens(torch.bincount(batch).tolist())
-
-        return attn_mask
 
 
 class Tokeniser(torch.nn.Module):
@@ -109,7 +112,7 @@ class Tokeniser(torch.nn.Module):
 
         self.cache = None
 
-    def forward(self, data: Data) -> torch.Tensor:
+    def forward(self, data: Data) -> tuple:
         multivectors, scalars = self.geometric_algebra_interface.embed(data)
 
         self.cache = {
@@ -132,7 +135,7 @@ class Tokeniser(torch.nn.Module):
         return multivectors, scalars, self.cache['reference_multivector'][data.scale0_sampling_index]
 
     @staticmethod
-    def construct_reference_multivector(x: torch.Tensor, batch=None):
+    def construct_reference_multivector(x: torch.Tensor, batch=None) -> torch.Tensor:
 
         if batch is None:
             reference_multivector = x.mean(dim=(0,1)).expand(x.size(0), 1, -1)
@@ -178,7 +181,7 @@ class Tokeniser(torch.nn.Module):
         scalars: torch.Tensor,
         scalars_skip: torch.Tensor,
         data: Data
-    ) -> torch.Tensor:
+    ) -> tuple:
 
         if data.batch is None:
             multivectors_skip = multivectors_skip.mean(dim=0, keepdim=True)
@@ -207,7 +210,7 @@ class PointCloudPooling(PointCloudPooling):
         pos_j: torch.Tensor,
         scalars_j: torch.Tensor,
         reference_multivector_j: torch.Tensor
-    ) -> torch.Tensor:
+    ) -> tuple:
 
         multivectors, scalars = self.mlp(
             torch.cat((x_j, embed_translation(pos_j - pos_i).unsqueeze(-2)), dim=-2),
@@ -217,7 +220,7 @@ class PointCloudPooling(PointCloudPooling):
 
         return multivectors, scalars
 
-    def aggregate(self, inputs: tuple, index: torch.Tensor, ptr=None, dim_size=None) -> torch.Tensor:
+    def aggregate(self, inputs: tuple, index: torch.Tensor, ptr=None, dim_size=None) -> tuple:
         multivectors, scalars = (self.aggr_module(tensor, index, ptr=ptr, dim_size=dim_size, dim=self.node_dim) for tensor in inputs)
 
         return multivectors, scalars
@@ -234,7 +237,7 @@ def interp(
     data: Data,
     scale_id: int,
     reference_multivector: torch.Tensor
-) -> torch.Tensor:
+) -> tuple:
 
     pos_diff = pos_source[data[f'scale{scale_id}_interp_source']] - pos_target[data[f'scale{scale_id}_interp_target']]
     squared_pos_dist = torch.clamp(torch.sum(pos_diff ** 2, dim=-1), min=1e-16).view(-1, 1, 1)
@@ -259,3 +262,158 @@ def interp(
     scalars = torch.cat((scalars, scalars_skip), dim=-1)
 
     return mlp(multivectors, scalars, reference_mv=reference_multivector)
+
+
+class CrossAttentionTokeniser(Tokeniser):
+
+    def __init__(self,
+        geometric_algebra_interface: object,
+        d_model: int,
+        num_attn_heads: int,
+        num_latent_channels=None,
+        dropout_probability=None
+    ):
+        super().__init__(geometric_algebra_interface, d_model)  # dummy init
+
+        self.geometric_algebra_interface = geometric_algebra_interface()
+
+        num_input_channels = self.geometric_algebra_interface.num_input_channels
+        num_output_channels = self.geometric_algebra_interface.num_output_channels
+
+        num_input_scalars = self.geometric_algebra_interface.num_input_scalars
+        num_output_scalars = self.geometric_algebra_interface.num_output_scalars
+
+        num_latent_channels = num_latent_channels or d_model
+
+        self.cross_attention_hatchling = CrossAttentionHatchling(
+            num_input_channels_source=num_input_channels,
+            num_input_channels_target=num_input_channels,
+            num_output_channels=d_model,
+            num_input_scalars_source=num_input_scalars,
+            num_input_scalars_target=num_input_scalars,
+            num_output_scalars=num_input_scalars,
+            num_attn_heads=num_attn_heads,
+            num_latent_channels=num_latent_channels,
+            dropout_probability=dropout_probability
+        )
+
+        self.mlp = MLP(
+            (d_model + num_input_channels, *[num_latent_channels] * 2, num_output_channels),
+            num_input_scalars=2 * num_input_scalars,
+            num_output_scalars=num_output_scalars,
+            use_norm_in_first=False,
+            dropout_probability=dropout_probability
+        )
+
+        self.cache = None
+
+    def forward(self, data: Data) -> tuple:
+        multivectors, scalars = self.geometric_algebra_interface.embed(data)
+
+        self.cache = {
+            'multivectors': multivectors,
+            'scalars': scalars,
+            'data': data,
+            'reference_multivector': self.construct_reference_multivector(multivectors, data.batch),
+            'pos': data.pos[data.scale0_sampling_index]
+        }
+
+        attn_mask = get_attn_mask(
+            target_batch=data.batch[data.scale0_sampling_index] if data.batch is not None else data.batch,
+            source_batch=data.batch
+        )
+
+        reference_multivector = self.cache['reference_multivector'][data.scale0_sampling_index]
+
+        multivectors, scalars = self.cross_attention_hatchling(
+            multivectors_source=multivectors,
+            multivectors_target=multivectors[data.scale0_sampling_index],
+            scalars_source=scalars,
+            scalars_target=scalars[data.scale0_sampling_index] if scalars is not None else scalars,
+            attn_mask=attn_mask,
+            reference_multivector=reference_multivector
+        )
+
+        return multivectors, scalars, reference_multivector
+
+
+class CrossAttentionHatchling(torch.nn.Module):
+
+    def __init__(
+        self,
+        num_input_channels_source: int,
+        num_input_channels_target: int,
+        num_output_channels: int,
+        num_input_scalars_source,
+        num_input_scalars_target,
+        num_output_scalars,
+        num_attn_heads: int,
+        num_latent_channels=None,
+        dropout_probability=None
+    ):
+        super().__init__()
+
+        num_latent_channels = num_latent_channels or num_output_channels
+
+        if num_input_channels_source == num_input_channels_target and num_input_scalars_source == num_input_scalars_target:
+            self.input_layer_source = self.input_layer_target = EquiLinear(
+                num_input_channels_source,
+                num_latent_channels,
+                in_s_channels=num_input_scalars_source,
+                out_s_channels=4 * num_latent_channels
+            )
+
+        else:
+            self.input_layer_source = EquiLinear(
+                num_input_channels_source,
+                num_latent_channels,
+                in_s_channels=num_input_scalars_source,
+                out_s_channels=4 * num_latent_channels
+            )
+            self.input_layer_target = EquiLinear(
+                num_input_channels_target,
+                num_latent_channels,
+                in_s_channels=num_input_scalars_target,
+                out_s_channels=4 * num_latent_channels
+            )
+
+        self.block = GATrCrossAttentionBlock(
+            mv_channels=num_latent_channels,
+            s_channels=4 * num_latent_channels,
+            attention=gatr.SelfAttentionConfig(num_heads=num_attn_heads),
+            mlp=gatr.MLPConfig(),
+            dropout_prob=dropout_probability
+        )
+
+        self.output_layer = EquiLinear(
+            num_latent_channels,
+            num_output_channels,
+            in_s_channels=4 * num_latent_channels,
+            out_s_channels=num_output_scalars
+        )
+
+    def forward(
+        self,
+        multivectors_source,
+        multivectors_target,
+        scalars_source=None,
+        scalars_target=None,
+        attn_mask=None,
+        reference_multivector="data"
+    ) -> tuple:
+
+        multivectors_source, scalars_source = self.input_layer_source(multivectors_source, scalars=scalars_source)
+        multivectors_target, scalars_target = self.input_layer_target(multivectors_target, scalars=scalars_target)
+
+        multivectors, scalars = self.block(
+            multivectors_source,
+            multivectors_target,
+            scalars_source,
+            scalars_target,
+            reference_mv=construct_reference_multivector(reference_multivector, multivectors_target),
+            attention_mask=attn_mask
+        )
+
+        multivectors, scalars = self.output_layer(multivectors, scalars=scalars)
+
+        return multivectors, scalars

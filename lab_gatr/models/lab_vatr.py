@@ -2,7 +2,7 @@ import torch
 import gatr.baselines
 from lab_gatr.nn.class_token import class_token_forward_wrapper
 from lab_gatr.data import Data
-from .lab_gatr import LaBGATr
+from lab_gatr.nn.attn_mask import get_attn_mask
 
 from lab_gatr.nn.mlp.vanilla import MLP
 from lab_gatr.nn.gnn import PointCloudPooling, pool
@@ -46,7 +46,7 @@ class LaBVaTr(torch.nn.Module):
     def forward(self, data: Data) -> torch.Tensor:
         x = self.tokeniser(data)
 
-        x = self.vatr(x, attention_mask=LaBGATr.get_attn_mask(data))
+        x = self.vatr(x, attention_mask=get_attn_mask(data.batch[data.scale0_sampling_index] if data.batch is not None else data.batch))
 
         return self.tokeniser.lift(x)
 

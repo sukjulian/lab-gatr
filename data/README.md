@@ -1,0 +1,2 @@
+## Data
+This folder contains sample-wise evaluation metrics produced by the experiments in ["LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes"](https://arxiv.org/abs/2403.07536): wall shear stress (WSS) estimation, velocity estimation and postmenstrual age (PMA) estimation. We provide these metrics to enable statistical significance analysis compared to your results on the same datasets.
