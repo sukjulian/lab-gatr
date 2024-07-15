@@ -1,5 +1,5 @@
-# LaB-GATr
-[Disclaimer:] this repository is currently under construction and will be frequently updated.
+# :lab_coat: LaB-GATr :crocodile:
+This repository contains the official implementation of ["LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes"](https://arxiv.org/abs/2403.07536) (MICCAI 2024) and ["Geometric algebra transformers for large 3D meshes via cross-attention"](https://openreview.net/forum?id=T2bBUlaJTA) (GRaM workshop @ ICML 2024).
 
 ## Installation
 We recommend creating a new Anaconda environment:
@@ -74,3 +74,28 @@ model = LaBGATr(GeometricAlgebraInterface, d_model=8, num_blocks=10, num_attn_he
 output = model(data)
 ```
 Setting `use_class_token=True` will result in mesh-level instead of vertex-level output.
+
+## New features
+Besides tokenisation via message passing, `lab_gatr` now also supports cross-attention for squence reduction. You can switch between the two by setting `pooling_mode='message_passing'` or `pooling_mode='cross_attention'` (default).
+
+## Citation
+If you use LaB-GATr in your research, please cite either (or both):
+```
+@article{Suk2024LaBGATrGA,
+  title={LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes},
+  author={Julian Suk and Baris Imre and Jelmer M. Wolterink},
+  journal={ArXiv},
+  year={2024},
+  volume={abs/2403.07536},
+  url={https://api.semanticscholar.org/CorpusID:268363685}
+}
+
+@inproceedings{
+  suk2024geometric,
+  title={Geometric algebra transformers for large 3D meshes via cross-attention},
+  author={Julian Suk and Pim De Haan and Baris Imre and Jelmer M. Wolterink},
+  booktitle={ICML 2024 Workshop on Geometry-grounded Representation Learning and Generative Modeling},
+  year={2024},
+  url={https://openreview.net/forum?id=T2bBUlaJTA}
+}
+```
