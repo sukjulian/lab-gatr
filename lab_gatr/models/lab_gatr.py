@@ -44,7 +44,7 @@ class LaBGATr(torch.nn.Module):
                     geometric_algebra_interface,
                     d_model,
                     num_attn_heads,
-                    num_latent_channels=4 * num_latent_channels,
+                    num_latent_channels=num_latent_channels,
                     dropout_probability=dropout_probability
                 )
 
@@ -360,7 +360,7 @@ class CrossAttentionHatchling(torch.nn.Module):
                 num_input_channels_source,
                 num_latent_channels,
                 in_s_channels=num_input_scalars_source,
-                out_s_channels=4 * num_latent_channels
+                out_s_channels=num_output_scalars
             )
 
         else:
@@ -368,18 +368,18 @@ class CrossAttentionHatchling(torch.nn.Module):
                 num_input_channels_source,
                 num_latent_channels,
                 in_s_channels=num_input_scalars_source,
-                out_s_channels=4 * num_latent_channels
+                out_s_channels=num_output_scalars
             )
             self.input_layer_target = EquiLinear(
                 num_input_channels_target,
                 num_latent_channels,
                 in_s_channels=num_input_scalars_target,
-                out_s_channels=4 * num_latent_channels
+                out_s_channels=num_output_scalars
             )
 
         self.block = GATrCrossAttentionBlock(
             mv_channels=num_latent_channels,
-            s_channels=4 * num_latent_channels,
+            s_channels=num_output_scalars,
             attention=gatr.SelfAttentionConfig(num_heads=num_attn_heads),
             mlp=gatr.MLPConfig(),
             dropout_prob=dropout_probability
@@ -388,7 +388,7 @@ class CrossAttentionHatchling(torch.nn.Module):
         self.output_layer = EquiLinear(
             num_latent_channels,
             num_output_channels,
-            in_s_channels=4 * num_latent_channels,
+            in_s_channels=num_output_scalars,
             out_s_channels=num_output_scalars
         )
 

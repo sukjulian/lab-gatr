@@ -14,7 +14,7 @@ class GATrCrossAttentionBlock(torch.nn.Module):
         s_channels: int,
         attention: gatr.layers.attention.config.SelfAttentionConfig,
         mlp: gatr.layers.mlp.config.MLPConfig,
-        dropout_prob=None,
+        dropout_prob=None
     ):
         super().__init__()
 
@@ -50,7 +50,7 @@ class GATrCrossAttentionBlock(torch.nn.Module):
         scalars_kv: torch.Tensor,
         scalars_q: torch.Tensor,
         reference_mv=None,
-        attention_mask=None,
+        attention_mask=None
     ) -> tuple:
 
         h_mv_kv, h_s_kv = self.norm(multivectors_kv, scalars=scalars_kv)
