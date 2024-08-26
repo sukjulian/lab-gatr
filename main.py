@@ -5,10 +5,10 @@ import torch_geometric as pyg
 from datasets import Dataset
 import wandb_impostor as wandb
 from lab_gatr import LaBGATr
-# from lab_gatr.models import LaBVaTr  # geometric algbera ablated LaB-GATr
+# from lab_gatr.models import LaBVaTr  # geometric algebra ablated LaB-GATr
 import torch
 from torch_cluster import knn
-from gatr.interface import embed_point, embed_oriented_plane, extract_translation
+from gatr.interface import embed_point, embed_oriented_plane, extract_oriented_plane
 import os
 from tqdm import tqdm
 import statistics
@@ -139,7 +139,7 @@ class GeometricAlgebraInterface:
 
     @staticmethod
     def dislodge(multivectors, scalars):
-        return extract_translation(multivectors).squeeze()
+        return extract_oriented_plane(multivectors).squeeze()
 
 
 def get_dataset_slices_for_gpus(num_gpus, num_samples, first_sample_idx=0):

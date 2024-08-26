@@ -10,7 +10,7 @@ from torch_scatter import scatter
 from gatr.interface import embed_translation
 
 from gatr.layers.linear import EquiLinear
-from lab_gatr.nn.blocks import GATrCrossAttentionBlock
+from lab_gatr.nn.blocks.cross_attention.geometric_algebra import CrossAttentionBlock
 from gatr.utils.tensors import construct_reference_multivector
 
 
@@ -93,8 +93,11 @@ class Tokeniser(torch.nn.Module):
 
         num_latent_channels = num_latent_channels or d_model
 
+        # Number of latent channels has to be even for "gatr" geometric bilinear layer
+        even_num_latent_channels = num_latent_channels - num_latent_channels % 2
+
         self.point_cloud_pooling = PointCloudPooling(MLP(
-            (num_input_channels + 1, num_latent_channels, d_model),
+            (num_input_channels + 1, even_num_latent_channels, d_model),
             num_input_scalars,
             num_output_scalars=num_input_scalars,
             plain_last=False,
@@ -103,7 +106,7 @@ class Tokeniser(torch.nn.Module):
         ), node_dim=0)
 
         self.mlp = MLP(
-            (d_model + num_input_channels, *[num_latent_channels] * 2, num_output_channels),
+            (d_model + num_input_channels, even_num_latent_channels, num_latent_channels, num_output_channels),
             num_input_scalars=2 * num_input_scalars,
             num_output_scalars=num_output_scalars,
             use_norm_in_first=False,
@@ -297,8 +300,11 @@ class CrossAttentionTokeniser(Tokeniser):
             dropout_probability=dropout_probability
         )
 
+        # Number of latent channels has to be even for "gatr" geometric bilinear layer
+        even_num_latent_channels = num_latent_channels - num_latent_channels % 2
+
         self.mlp = MLP(
-            (d_model + num_input_channels, *[num_latent_channels] * 2, num_output_channels),
+            (d_model + num_input_channels, even_num_latent_channels, num_latent_channels, num_output_channels),
             num_input_scalars=2 * num_input_scalars,
             num_output_scalars=num_output_scalars,
             use_norm_in_first=False,
@@ -377,7 +383,7 @@ class CrossAttentionHatchling(torch.nn.Module):
                 out_s_channels=num_output_scalars
             )
 
-        self.block = GATrCrossAttentionBlock(
+        self.block = CrossAttentionBlock(
             mv_channels=num_latent_channels,
             s_channels=num_output_scalars,
             attention=gatr.SelfAttentionConfig(num_heads=num_attn_heads),

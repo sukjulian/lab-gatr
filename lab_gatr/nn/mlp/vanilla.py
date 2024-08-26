@@ -1,9 +1,9 @@
 import torch
-from torch.nn import Linear, BatchNorm1d, Identity, ReLU
+from torch.nn import Linear, BatchNorm1d, Identity, ReLU, Dropout
 
 
 class MLP(torch.nn.Module):
-    def __init__(self, num_channels: tuple, plain_last: bool = True, use_norm_in_first: bool = True):
+    def __init__(self, num_channels: tuple, plain_last: bool = True, use_norm_in_first: bool = True, dropout_probability=None):
         super().__init__()
 
         self.linear_layers = torch.nn.ModuleList()
@@ -28,9 +28,11 @@ class MLP(torch.nn.Module):
             self.norm_layers.append(BatchNorm1d(num_channels[-1], track_running_stats=False))
             self.activations.append(ReLU())
 
+        self.dropout = Dropout(dropout_probability) if dropout_probability else Identity()
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
         for linear_layer, norm_layer, activation in zip(self.linear_layers, self.norm_layers, self.activations):
-            x = activation(norm_layer(linear_layer(x)))
+            x = activation(norm_layer(linear_layer(self.dropout(x))))
 
         return x

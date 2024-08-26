@@ -6,7 +6,7 @@ from gatr.layers.attention.cross_attention import CrossAttention
 from gatr.layers.mlp.mlp import GeoMLP
 
 
-class GATrCrossAttentionBlock(torch.nn.Module):
+class CrossAttentionBlock(torch.nn.Module):
 
     def __init__(
         self,
