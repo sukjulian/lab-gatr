@@ -12,7 +12,7 @@ minimal_installation_requirements = [
 
 setup(
     name="lab_gatr",
-    version="0.4.0",
+    version="0.4.1",
     author="Julian Suk",
     author_email="j.m.suk@utwente.nl",
     license="MIT",
