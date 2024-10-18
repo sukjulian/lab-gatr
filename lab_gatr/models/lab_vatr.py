@@ -23,7 +23,7 @@ class LaBVaTr(torch.nn.Module):
         num_attn_heads: int,
         num_latent_channels=None,
         use_class_token: bool = False,
-        pooling_mode: str = 'cross_attention'
+        pooling_mode: str = 'message_passing'
     ):
         super().__init__()
 
@@ -92,7 +92,7 @@ class Tokeniser(torch.nn.Module):
             plain_last=False,
             use_norm_in_first=False,
             dropout_probability=dropout_probability
-        ), node_dim=0)
+        ), aggr='max')
 
         self.mlp = MLP(
             (d_model + num_input_channels, *[num_latent_channels] * 2, num_output_channels),
