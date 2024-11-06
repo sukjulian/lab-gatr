@@ -5,12 +5,12 @@ from torch_cluster import fps, knn
 
 
 class PointCloudPoolingScales():
-    """Nested hierarchy of sub-sampled point clouds. Each coarse-scale point is mapped to a cluster of fine-scale points. Barycentric
+    """Nested hierarchy of sub-sampled point clouds. Each coarse-scale point is mapped to a cluster of fine-scale points. Proportional
     interpolation from the coarse to the fine scales. For correct batching, "torch_geometric.data.Data.__inc__()" has to be overridden.
 
     Args:
         rel_sampling_ratios (tuple): relative ratios for successive farthest point sampling
-        interp_simplex (str): reference simplex for barycentric interpolation ('triangle' or 'tetrahedron')
+        interp_simplex (str): reference simplex for proportional interpolation ('triangle' or 'tetrahedron')
     """
 
     def __init__(self, rel_sampling_ratios: tuple, interp_simplex: str):
