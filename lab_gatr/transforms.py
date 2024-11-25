@@ -22,7 +22,7 @@ class PointCloudPoolingScales():
     def __call__(self, data: pyg.data.Data) -> Data:
 
         pos = data.pos
-        batch = data.surface_id.long() if hasattr(data, 'surface_id') else torch.zeros(pos.size(0), dtype=torch.long)
+        batch = data.surface_id.long() if hasattr(data, 'surface_id') else torch.zeros(pos.size(0), dtype=torch.long, device=pos.device)
 
         for i, sampling_ratio in enumerate(self.rel_sampling_ratios):
 
