@@ -1,5 +1,10 @@
 # :lab_coat: LaB-GATr :crocodile:
-This repository contains the official implementation of ["LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes"](https://arxiv.org/abs/2403.07536) (MICCAI 2024) and ["Geometric algebra transformers for large 3D meshes via cross-attention"](https://openreview.net/forum?id=T2bBUlaJTA) (GRaM workshop @ ICML 2024).
+
+![Version number](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fsukjulian%2Flab-gatr%2Frefs%2Fheads%2Fmain%2Fpyproject.toml&query=%24.project.version&label=version)
+[![Static Badge](https://img.shields.io/badge/paper-MICCAI_2024-green)
+](https://link.springer.com/chapter/10.1007/978-3-031-72390-2_18)
+
+This repository contains the official implementation of **LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes** [arXiv](https://arxiv.org/abs/2403.07536) and **Geometric algebra transformers for large 3D meshes via cross-attention** [OpenReview](https://openreview.net/forum?id=T2bBUlaJTA).
 
 ## Installation
 We recommend creating a new Anaconda environment (tested on Python 3.11):
