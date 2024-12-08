@@ -2,26 +2,30 @@
 This repository contains the official implementation of ["LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes"](https://arxiv.org/abs/2403.07536) (MICCAI 2024) and ["Geometric algebra transformers for large 3D meshes via cross-attention"](https://openreview.net/forum?id=T2bBUlaJTA) (GRaM workshop @ ICML 2024).
 
 ## Installation
-We recommend creating a new Anaconda environment:
+We recommend creating a new Anaconda environment (tested on Python 3.11):
 ```shell
-conda create --name lab-gatr python=3.10
+conda create --name lab-gatr python=3.11
 conda activate lab-gatr
 ```
-Next, install PyTorch and xFormers depending on your system. In our case, this was
+Next, install PyTorch and xFormers (tested on the following versions) depending on your system. In our case, this was
 ```shell
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 pip install xformers==0.0.22.post7 --index-url https://download.pytorch.org/whl/cu121
 ```
-Additonally, we need Pytorch Geometric (currently only v2.4.0) and some dependencies
+Additonally, we need PyTorch Geometric and some dependencies (tested on the following versions)
 ```shell
 pip install torch_geometric==2.4.0
-pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.0+cu121.html
+pip install torch_scatter torch_cluster --find-links https://data.pyg.org/whl/torch-2.1.0+cu121.html
 ```
-You can now install `lab_gatr` (which also installs [`gatr`](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)) via
+You can now install [`gatr`](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer):
+```shell
+pip install git+https://github.com/Qualcomm-AI-research/geometric-algebra-transformer.git
+```
+and then `lab_gatr` via
 ```shell
 pip install .
 ```
-from within this repository.
+from within this repository. If you experience performance issues with current versions of some of these packages, consider resetting to the above versions.
 
 ## Getting started
 LaB-GATr requires two things: a point cloud pooling transform for the tokenisation (patching) and a geometric algebra interface to embed your data in $\mathbf{G}(3, 0, 1)$. In the following we provide a minimal working example.
@@ -81,20 +85,21 @@ Besides tokenisation via message passing, `lab_gatr` now also supports cross-att
 ## Citation
 If you use LaB-GATr in your research, please cite either (or both):
 ```
-@article{Suk2024LaBGATrGA,
-  title={LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes},
+@inproceedings{LaBGATrMICCAI,
   author={Julian Suk and Baris Imre and Jelmer M. Wolterink},
-  journal={ArXiv},
+  title={{LaB-GATr}: geometric algebra transformers for large biomedical surface and volume meshes},
+  booktitle={Medical Image Computing and Computer Assisted Intervention (MICCAI)},
   year={2024},
-  volume={abs/2403.07536},
-  url={https://api.semanticscholar.org/CorpusID:268363685}
+  publisher={Springer Nature Switzerland},
+  address={Cham},
+  pages={185--195},
+  isbn={978-3-031-72390-2}
 }
 
-@inproceedings{
-  suk2024geometric,
-  title={Geometric algebra transformers for large 3D meshes via cross-attention},
-  author={Julian Suk and Pim De Haan and Baris Imre and Jelmer M. Wolterink},
-  booktitle={ICML 2024 Workshop on Geometry-grounded Representation Learning and Generative Modeling},
+@inproceedings{LaBGATrGRaM,
+  title={Geometric algebra transformers for large {3D} meshes via cross-attention},
+  author={Julian Suk and Pim de Haan and Baris Imre and Jelmer M. Wolterink},
+  booktitle={ICML Workshop on Geometry-grounded Representation Learning and Generative Modeling (GRaM)},
   year={2024},
   url={https://openreview.net/forum?id=T2bBUlaJTA}
 }

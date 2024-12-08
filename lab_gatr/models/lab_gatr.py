@@ -83,7 +83,7 @@ class LaBGATr(torch.nn.Module):
 class Tokeniser(torch.nn.Module):
     def __init__(self, geometric_algebra_interface: object, d_model: int, num_latent_channels=None, dropout_probability=None):
         super().__init__()
-        self.geometric_algebra_interface = geometric_algebra_interface()
+        self.geometric_algebra_interface = geometric_algebra_interface
 
         num_input_channels = self.geometric_algebra_interface.num_input_channels
         num_output_channels = self.geometric_algebra_interface.num_output_channels
@@ -278,7 +278,7 @@ class CrossAttentionTokeniser(Tokeniser):
     ):
         super().__init__(geometric_algebra_interface, d_model)  # dummy init
 
-        self.geometric_algebra_interface = geometric_algebra_interface()
+        self.geometric_algebra_interface = geometric_algebra_interface
 
         num_input_channels = self.geometric_algebra_interface.num_input_channels
         num_output_channels = self.geometric_algebra_interface.num_output_channels

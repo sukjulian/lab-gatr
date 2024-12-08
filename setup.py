@@ -7,7 +7,7 @@ minimal_installation_requirements = [
     "torch_geometric",
     "torch_scatter",
     "torch_cluster",
-    "gatr @ git+https://github.com/Qualcomm-AI-research/geometric-algebra-transformer.git"
+    "gatr"
 ]
 
 setup(
