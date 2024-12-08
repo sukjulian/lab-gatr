@@ -1,10 +1,10 @@
 # :lab_coat: LaB-GATr :crocodile:
 
-![Version number](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fsukjulian%2Flab-gatr%2Frefs%2Fheads%2Fmain%2Fpyproject.toml&query=%24.project.version&label=version)
-[![Static Badge](https://img.shields.io/badge/paper-MICCAI_2024-green)
+[![Version number](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fsukjulian%2Flab-gatr%2Frefs%2Fheads%2Fmain%2Fpyproject.toml&query=%24.project.version&label=Version)](https://github.com/sukjulian/lab-gatr)
+[![Static Badge](https://img.shields.io/badge/Paper-MICCAI_2024-green)
 ](https://link.springer.com/chapter/10.1007/978-3-031-72390-2_18)
 
-This repository contains the official implementation of **LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes** [arXiv](https://arxiv.org/abs/2403.07536) and **Geometric algebra transformers for large 3D meshes via cross-attention** [OpenReview](https://openreview.net/forum?id=T2bBUlaJTA).
+This repository contains the official implementation of **LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes** ([arXiv](https://arxiv.org/abs/2403.07536)) and **Geometric algebra transformers for large 3D meshes via cross-attention** ([OpenReview](https://openreview.net/forum?id=T2bBUlaJTA)).
 
 ## Installation
 We recommend creating a new Anaconda environment (tested on Python 3.11):
@@ -12,7 +12,7 @@ We recommend creating a new Anaconda environment (tested on Python 3.11):
 conda create --name lab-gatr python=3.11
 conda activate lab-gatr
 ```
-Next, install PyTorch and xFormers (tested on the following versions) depending on your system. In our case, this was
+Next, install PyTorch and xFormers (tested on the following versions) based on your system. In our case, this was
 ```shell
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 pip install xformers==0.0.22.post7 --index-url https://download.pytorch.org/whl/cu121
@@ -22,7 +22,7 @@ Additonally, we need PyTorch Geometric and some dependencies (tested on the foll
 pip install torch_geometric==2.4.0
 pip install torch_scatter torch_cluster --find-links https://data.pyg.org/whl/torch-2.1.0+cu121.html
 ```
-You can now install [`gatr`](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer):
+You can now install `gatr` ([GitHub](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)):
 ```shell
 pip install git+https://github.com/Qualcomm-AI-research/geometric-algebra-transformer.git
 ```
