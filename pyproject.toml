@@ -13,9 +13,9 @@ dependencies = [
     "gatr"
 ]
 description = "Geometric algbera transformers for large biomedical surface and volume meshes"
-license = {text = "MIT"}
+license = {text = "MIT License"}
 name = "lab_gatr"
 version = "0.4.3"
 
-[tool.setuptools.packages.find]
-include = ["lab_gatr.*"]
+[tool.setuptools.packages]
+find = {}
