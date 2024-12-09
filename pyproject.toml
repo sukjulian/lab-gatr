@@ -17,5 +17,5 @@ license = {text = "MIT"}
 name = "lab_gatr"
 version = "0.4.3"
 
-[tool.setuptools]
-packages = ["lab_gatr"]
+[tool.setuptools.packages.find]
+include = ["lab_gatr.*"]
