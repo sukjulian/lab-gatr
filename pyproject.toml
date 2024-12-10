@@ -3,7 +3,12 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools"]
 
 [project]
-authors = [{name = "Julian Suk", email = "j.m.suk@utwente.nl"}]
+authors = [
+    {name = "Julian Suk"},
+    {name = "Baris Imre"},
+    {name = "Julian Suk", email = "julian.suk@gmail.com"},
+    {name = "Baris Imre", email = "barisimre98@gmail.com"}
+]
 dependencies = [
     "torch",
     "xformers",
@@ -16,6 +21,9 @@ description = "Geometric algbera transformers for large biomedical surface and v
 license = {text = "MIT License"}
 name = "lab_gatr"
 version = "0.4.3"
+
+[project.urls]
+homepage = "https://github.com/sukjulian/lab-gatr"
 
 [tool.setuptools.packages]
 find = {}
