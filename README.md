@@ -28,7 +28,7 @@ and then `lab_gatr` via
 ```shell
 pip install .
 ```
-from within this repository. Currently, a `FutureWarning` is triggered by `gatr` which should disappear in the future.
+from within this repository. Currently `FutureWarning` is triggered by `gatr` which should disappear in the future.
 
 ## Getting started
 LaB-GATr requires two things: a point cloud pooling transform for the tokenisation (patching) and a geometric algebra interface to embed your data in $\mathbf{G}(3, 0, 1)$. In the following we provide a minimal working example.
