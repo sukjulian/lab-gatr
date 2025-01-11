@@ -12,15 +12,13 @@ We recommend creating a new Anaconda environment (tested on Python 3.11):
 conda create --name lab-gatr python=3.11
 conda activate lab-gatr
 ```
-Next, install PyTorch and xFormers (tested on the following versions) based on your system. In our case, this was
+Next, install PyTorch, xFormers and PyG
 ```shell
-pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121
-pip install xformers==0.0.22.post7 --index-url https://download.pytorch.org/whl/cu121
+pip install torch xformers torch_geometric
 ```
-Additonally, we need PyTorch Geometric and some dependencies (tested on the following versions)
+Additonally, we need some dependencies
 ```shell
-pip install torch_geometric==2.4.0
-pip install torch_scatter torch_cluster --find-links https://data.pyg.org/whl/torch-2.1.0+cu121.html
+pip install torch_scatter torch_cluster --find-links https://data.pyg.org/whl/torch-2.5.0+cu124.html
 ```
 You can now install `gatr` ([GitHub](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)):
 ```shell
@@ -30,7 +28,7 @@ and then `lab_gatr` via
 ```shell
 pip install .
 ```
-from within this repository. If you experience performance issues with current versions of some of these packages, consider resetting to the above versions.
+from within this repository. Currently, a `FutureWarning` is triggered by `gatr` which should disappear in the future.
 
 ## Getting started
 LaB-GATr requires two things: a point cloud pooling transform for the tokenisation (patching) and a geometric algebra interface to embed your data in $\mathbf{G}(3, 0, 1)$. In the following we provide a minimal working example.
