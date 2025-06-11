@@ -61,6 +61,6 @@ class Dataset(pyg.data.Dataset):
         return len(self.processed_file_names)
 
     def get(self, idx):
-        data = torch.load(os.path.join(self.processed_dir, self.processed_file_names[idx]))
+        data = torch.load(os.path.join(self.processed_dir, self.processed_file_names[idx]), weights_only=False)
 
         return data

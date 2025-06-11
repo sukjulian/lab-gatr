@@ -277,6 +277,7 @@ class CrossAttentionTokeniser(Tokeniser):
         dropout_probability=None
     ):
         super().__init__(geometric_algebra_interface, d_model)  # dummy init
+        delattr(self, "point_cloud_pooling")
 
         self.geometric_algebra_interface = geometric_algebra_interface
 

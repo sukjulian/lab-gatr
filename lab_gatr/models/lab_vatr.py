@@ -165,6 +165,7 @@ class CrossAttentionTokeniser(Tokeniser):
         dropout_probability=None
     ):
         super().__init__(num_input_channels, num_output_channels, d_model)  # dummy init
+        delattr(self, "point_cloud_pooling")
 
         num_latent_channels = num_latent_channels or d_model
 
