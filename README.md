@@ -7,28 +7,26 @@
 This repository contains the official implementation of **LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes** ([arXiv](https://arxiv.org/abs/2403.07536)) and **Geometric algebra transformers for large 3D meshes via cross-attention** ([OpenReview](https://openreview.net/forum?id=T2bBUlaJTA)).
 
 ## Installation
-We recommend creating a new Anaconda environment (tested on Python 3.11):
+We recommend creating a new Anaconda environment (`gatr` installation requires Python 3.11):
 ```shell
 conda create --name lab-gatr python=3.11
 conda activate lab-gatr
 ```
-Next, install PyTorch, xFormers and PyG
+Next, install PyTorch, PyG and xFormers
 ```shell
-pip install torch xformers torch_geometric
+pip install torch
+pip install torch_geometric torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.7.0+cu126.html
+pip install xformers --index-url https://download.pytorch.org/whl/cu126
 ```
-Additonally, we need some dependencies
+You can now (resolve a dependency conflict and) install `gatr` ([GitHub](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)) via
 ```shell
-pip install torch_scatter torch_cluster --find-links https://data.pyg.org/whl/torch-2.5.0+cu124.html
-```
-You can now install `gatr` ([GitHub](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)):
-```shell
+pip install scipy==1.15
 pip install git+https://github.com/Qualcomm-AI-research/geometric-algebra-transformer.git
 ```
 and then `lab_gatr` via
 ```shell
 pip install git+https://github.com/sukjulian/lab-gatr.git
 ```
-from within this repository. Currently `FutureWarning` is triggered by `gatr` which should disappear in the future.
 
 ## Getting started
 LaB-GATr requires two things: a point cloud pooling transform for the tokenisation (patching) and a geometric algebra interface to embed your data in $\mathbf{G}(3, 0, 1)$. In the following we provide a minimal working example.
