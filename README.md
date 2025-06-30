@@ -26,7 +26,7 @@ pip install git+https://github.com/Qualcomm-AI-research/geometric-algebra-transf
 ```
 and then `lab_gatr` via
 ```shell
-pip install .
+pip install git+https://github.com/sukjulian/lab-gatr.git
 ```
 from within this repository. Currently `FutureWarning` is triggered by `gatr` which should disappear in the future.
 
