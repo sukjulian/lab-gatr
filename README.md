@@ -86,22 +86,24 @@ Besides tokenisation via message passing, `lab_gatr` now also supports cross-att
 ## Citation
 If you use LaB-GATr in your research, please cite either (or both):
 ```
-@inproceedings{LaBGATrMICCAI,
-  author={Julian Suk and Baris Imre and Jelmer M. Wolterink},
-  title={{LaB-GATr}: geometric algebra transformers for large biomedical surface and volume meshes},
-  booktitle={Medical Image Computing and Computer Assisted Intervention (MICCAI)},
-  year={2024},
-  publisher={Springer Nature Switzerland},
-  address={Cham},
-  pages={185--195},
-  isbn={978-3-031-72390-2}
+@inproceedings{LaBGATr,
+author="Suk, Julian
+and Imre, Baris
+and Wolterink, Jelmer M.",
+title="{LaB-GATr}: Geometric Algebra Transformers for Large Biomedical Surface and Volume Meshes",
+booktitle="Medical Image Computing and Computer Assisted Intervention",
+year="2024",
+publisher="Springer Nature Switzerland",
+address="Cham",
+pages="185--195",
+isbn="978-3-031-72390-2"
 }
 
-@inproceedings{LaBGATrGRaM,
-  title={Geometric algebra transformers for large {3D} meshes via cross-attention},
-  author={Julian Suk and Pim de Haan and Baris Imre and Jelmer M. Wolterink},
-  booktitle={ICML Workshop on Geometry-grounded Representation Learning and Generative Modeling (GRaM)},
-  year={2024},
-  url={https://openreview.net/forum?id=T2bBUlaJTA}
+@inproceedings{GeometricAlgebraTransformers,
+title={Geometric algebra transformers for large {3D} meshes via cross-attention},
+author={Julian Suk and Pim De Haan and Baris Imre and Jelmer M. Wolterink},
+booktitle={ICML Workshop on Geometry-grounded Representation Learning and Generative Modeling},
+year={2024},
+url={https://openreview.net/forum?id=T2bBUlaJTA}
 }
 ```
