@@ -6,21 +6,20 @@
 This repository contains the official implementation of **LaB-GATr: geometric algebra transformers for large biomedical surface and volume meshes** ([arXiv](https://arxiv.org/abs/2403.07536)) and **Geometric algebra transformers for large 3D meshes via cross-attention** ([OpenReview](https://openreview.net/forum?id=T2bBUlaJTA)).
 
 ## Installation
-We recommend creating a new Anaconda environment (`gatr` installation requires Python 3.11):
+We recommend creating a new Anaconda environment
 ```shell
-conda create --name lab-gatr python=3.11
+conda create --name lab-gatr python=3.12
 conda activate lab-gatr
 ```
-Next, install PyTorch, PyG and xFormers
+Next, install PyTorch, PyG and xFormers (CUDA 12.8)
 ```shell
-pip install torch
-pip install torch_geometric torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.7.0+cu126.html
-pip install xformers --index-url https://download.pytorch.org/whl/cu126
+pip install torch==2.8 --index-url https://download.pytorch.org/whl/cu128
+pip install torch_geometric torch_scatter torch_cluster --find-links https://data.pyg.org/whl/torch-2.8.0+cu128.html
+pip install xformers==0.0.32.post2 --index-url https://download.pytorch.org/whl/cu128
 ```
-You can now (resolve a dependency conflict and) install `gatr` ([GitHub](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)) via
+You can now install `gatr` ([GitHub](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)) via
 ```shell
-pip install scipy==1.15
-pip install git+https://github.com/Qualcomm-AI-research/geometric-algebra-transformer.git
+pip install git+https://github.com/sukjulian/geometric-algebra-transformer.git
 ```
 and then `lab_gatr` via
 ```shell
