@@ -1,12 +1,13 @@
 import torch
 from gatr.baselines.transformer import BaselineLayerNorm
+from gatr.layers import ApplyRotaryPositionalEncoding
 from einops import rearrange
 from gatr.utils.tensors import to_nd, expand_pairwise
 from gatr.primitives.attention import scaled_dot_product_attention
 
 
 class CrossAttentionBlock(torch.nn.Module):
-    def __init__(self, channels: int, num_heads: int, dropout_prob=None):
+    def __init__(self, channels: int, num_heads: int, dropout_prob=None, positional_encoding_base=None):
         super().__init__()
 
         self.norm = BaselineLayerNorm()
@@ -20,7 +21,8 @@ class CrossAttentionBlock(torch.nn.Module):
             out_channels=channels,
             hidden_channels=hidden_channels,
             num_heads=num_heads,
-            dropout_prob=dropout_prob
+            dropout_prob=dropout_prob,
+            positional_encoding_base=positional_encoding_base
         )
 
         self.mlp = torch.nn.Sequential(
@@ -58,7 +60,8 @@ class CrossAttention(torch.nn.Module):
         out_channels: int,
         hidden_channels: int,
         num_heads: int,
-        dropout_prob=None
+        dropout_prob=None,
+        positional_encoding_base=None
     ):
         super().__init__()
 
@@ -70,8 +73,20 @@ class CrossAttention(torch.nn.Module):
 
         self.dropout = torch.nn.Dropout(dropout_prob) if dropout_prob else torch.nn.Identity()
 
+        if positional_encoding_base:
+            self.positional_encoding = ApplyRotaryPositionalEncoding(
+                hidden_channels,
+                item_dim=-2,
+                base=positional_encoding_base
+            )
+        else:
+            self.positional_encoding = torch.nn.Identity()
+
     def forward(self, inputs_kv: torch.Tensor, inputs_q: torch.Tensor, attention_mask=None) -> torch.Tensor:
         q, k, v = self.qkv_linear(inputs_kv, inputs_q)
+
+        q = self.positional_encoding(q)
+        k = self.positional_encoding(k)
 
         h = self._attend(q, k, v, attention_mask)
 

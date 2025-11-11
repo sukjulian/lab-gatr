@@ -23,7 +23,8 @@ class LaBVaTr(torch.nn.Module):
         num_attn_heads: int,
         num_latent_channels=None,
         use_class_token: bool = False,
-        pooling_mode: str = 'message_passing'
+        pooling_mode: str = 'message_passing',
+        positional_encoding_base=None
     ):
         super().__init__()
 
@@ -43,7 +44,8 @@ class LaBVaTr(torch.nn.Module):
                     num_output_channels,
                     d_model,
                     num_attn_heads,
-                    num_latent_channels=num_latent_channels
+                    num_latent_channels=num_latent_channels,
+                    positional_encoding_base=positional_encoding_base
                 )
 
         # Number of latent channels has to be divisible by four for xFormers block-diagonal attention bias
@@ -55,6 +57,8 @@ class LaBVaTr(torch.nn.Module):
             hidden_channels=num_latent_channels,
             num_blocks=num_blocks,
             num_heads=num_attn_heads,
+            pos_encoding=positional_encoding_base is not None,
+            pos_encoding_base=positional_encoding_base,
             multi_query=True
         )
 
@@ -162,7 +166,8 @@ class CrossAttentionTokeniser(Tokeniser):
         d_model: int,
         num_attn_heads: int,
         num_latent_channels=None,
-        dropout_probability=None
+        dropout_probability=None,
+        positional_encoding_base=None
     ):
         super().__init__(num_input_channels, num_output_channels, d_model)  # dummy init
         delattr(self, "point_cloud_pooling")
@@ -175,7 +180,8 @@ class CrossAttentionTokeniser(Tokeniser):
             num_output_channels=d_model,
             num_attn_heads=num_attn_heads,
             num_latent_channels=num_latent_channels,
-            dropout_probability=dropout_probability
+            dropout_probability=dropout_probability,
+            positional_encoding_base=positional_encoding_base
         )
 
         self.mlp = MLP(
@@ -206,7 +212,8 @@ class CrossAttentionYoda(torch.nn.Module):
         num_output_channels: int,
         num_attn_heads: int,
         num_latent_channels=None,
-        dropout_probability=None
+        dropout_probability=None,
+        positional_encoding_base=None
     ):
         super().__init__()
 
@@ -222,7 +229,8 @@ class CrossAttentionYoda(torch.nn.Module):
         self.block = CrossAttentionBlock(
             channels=num_latent_channels,
             num_heads=num_attn_heads,
-            dropout_prob=dropout_probability
+            dropout_prob=dropout_probability,
+            positional_encoding_base=positional_encoding_base
         )
 
         self.output_layer = Linear(num_latent_channels, num_output_channels)
