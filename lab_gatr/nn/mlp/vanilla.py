@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Linear, BatchNorm1d, Identity, ReLU, Dropout
+from torch.nn import Linear, BatchNorm1d, Identity, GELU, Dropout
 
 
 class MLP(torch.nn.Module):
@@ -23,12 +23,12 @@ class MLP(torch.nn.Module):
             self.norm_layers.append(BatchNorm1d(num_channels[1], track_running_stats=use_running_stats_in_norm))
         else:
             self.norm_layers.append(Identity())
-        self.activations.append(ReLU())
+        self.activations.append(GELU())
 
         for num_channels_in, num_channels_out in zip(num_channels[1:-2], num_channels[2:-1]):
             self.linear_layers.append(Linear(num_channels_in, num_channels_out))
             self.norm_layers.append(BatchNorm1d(num_channels_out, track_running_stats=use_running_stats_in_norm))
-            self.activations.append(ReLU())
+            self.activations.append(GELU())
 
         self.linear_layers.append(Linear(*num_channels[-2:]))
 
@@ -37,7 +37,7 @@ class MLP(torch.nn.Module):
             self.activations.append(Identity())
         else:
             self.norm_layers.append(BatchNorm1d(num_channels[-1], track_running_stats=use_running_stats_in_norm))
-            self.activations.append(ReLU())
+            self.activations.append(GELU())
 
         self.dropout = Dropout(dropout_probability) if dropout_probability else Identity()
 
