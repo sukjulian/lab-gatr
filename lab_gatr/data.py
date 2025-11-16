@@ -16,10 +16,10 @@ class Data(pyg.data.Data):
             if int(key[5]) == 0:
                 return self.num_nodes
             else:
-                return self[f'scale{int(key[5]) - 1}_sampling_index'].size(dim=0)
+                return self[f'scale{int(key[5]) - 1}_sampling_index'].size(0)
         elif 'index' in key or key == 'face' or key == 'tets':
             return self.num_nodes
         elif 'pool_target' in key or 'interp_source' in key:
-            return self[f'scale{key[5]}_sampling_index'].size(dim=0)
+            return self[f'scale{key[5]}_sampling_index'].size(0)
         else:
             return 0

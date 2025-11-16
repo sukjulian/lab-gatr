@@ -7,7 +7,7 @@ from gatr.primitives.attention import scaled_dot_product_attention
 
 
 class CrossAttentionBlock(torch.nn.Module):
-    def __init__(self, channels: int, num_heads: int, dropout_prob=None, positional_encoding_base=None):
+    def __init__(self, channels: int, num_heads: int, dropout_prob=None, pos_enc_base=None):
         super().__init__()
 
         self.norm = BaselineLayerNorm()
@@ -22,7 +22,7 @@ class CrossAttentionBlock(torch.nn.Module):
             hidden_channels=hidden_channels,
             num_heads=num_heads,
             dropout_prob=dropout_prob,
-            positional_encoding_base=positional_encoding_base
+            pos_enc_base=pos_enc_base
         )
 
         self.mlp = torch.nn.Sequential(
@@ -61,7 +61,7 @@ class CrossAttention(torch.nn.Module):
         hidden_channels: int,
         num_heads: int,
         dropout_prob=None,
-        positional_encoding_base=None
+        pos_enc_base=None
     ):
         super().__init__()
 
@@ -73,12 +73,8 @@ class CrossAttention(torch.nn.Module):
 
         self.dropout = torch.nn.Dropout(dropout_prob) if dropout_prob else torch.nn.Identity()
 
-        if positional_encoding_base:
-            self.positional_encoding = ApplyRotaryPositionalEncoding(
-                hidden_channels,
-                item_dim=-2,
-                base=positional_encoding_base
-            )
+        if pos_enc_base:
+            self.positional_encoding = ApplyRotaryPositionalEncoding(hidden_channels, item_dim=-2, base=pos_enc_base)
         else:
             self.positional_encoding = torch.nn.Identity()
 
