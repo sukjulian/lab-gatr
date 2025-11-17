@@ -32,6 +32,9 @@ class LaBVaTr(torch.nn.Module):
     ):
         super().__init__()
 
+        if pooling_mode == 'message_passing' and use_positional_encoding:
+            raise NotImplementedError
+
         num_latent_channels = num_latent_channels or d_model
 
         match pooling_mode:
