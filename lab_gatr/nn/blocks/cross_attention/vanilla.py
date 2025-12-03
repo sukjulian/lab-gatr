@@ -7,7 +7,7 @@ from gatr.primitives.attention import scaled_dot_product_attention
 
 
 class CrossAttentionBlock(torch.nn.Module):
-    def __init__(self, channels: int, num_heads: int, dropout_prob=None, pos_enc_base=None):
+    def __init__(self, channels: int, num_heads: int, dropout_prob=None, pos_encoding_base=None):
         super().__init__()
 
         self.norm = BaselineLayerNorm()
@@ -22,7 +22,7 @@ class CrossAttentionBlock(torch.nn.Module):
             hidden_channels=hidden_channels,
             num_heads=num_heads,
             dropout_prob=dropout_prob,
-            pos_enc_base=pos_enc_base
+            pos_enc_base=pos_encoding_base
         )
 
         self.mlp = torch.nn.Sequential(

@@ -8,7 +8,6 @@ from lab_gatr.nn.mlp.vanilla import MLP
 from lab_gatr.nn.gnn import PointCloudPooling, pool
 from torch_scatter import scatter
 
-from lab_gatr.nn.positional_encoding import PositionalEncoding
 from torch.nn import Linear
 from lab_gatr.nn.blocks.cross_attention.vanilla import CrossAttentionBlock
 
@@ -181,11 +180,9 @@ class CrossAttentionTokeniser(Tokeniser):
 
         num_latent_channels = num_latent_channels or d_model
 
-        self.positional_encoding = PositionalEncoding(num_channels=d_model) if use_positional_encoding else torch.nn.Identity()
-
         self.cross_attention_yoda = CrossAttentionYoda(
-            num_input_channels_source=d_model if use_positional_encoding else num_input_channels,
-            num_input_channels_target=d_model if use_positional_encoding else num_input_channels,
+            num_input_channels_source=num_input_channels,
+            num_input_channels_target=num_input_channels,
             num_output_channels=d_model,
             num_attn_heads=num_attn_heads,
             num_latent_channels=num_latent_channels,
@@ -204,14 +201,12 @@ class CrossAttentionTokeniser(Tokeniser):
     def forward(self, data: Data) -> torch.Tensor:
         self.cache = {'data': data, 'pos': data.pos[data.scale0_sampling_index]}
 
-        x = self.positional_encoding(data.x)
-
         attn_mask = get_attn_mask(
             target_batch=data.batch[data.scale0_sampling_index] if data.batch is not None else data.batch,
             source_batch=data.batch
         )
 
-        return self.cross_attention_yoda(x_source=x, x_target=x[data.scale0_sampling_index], attn_mask=attn_mask)
+        return self.cross_attention_yoda(x_source=data.x, x_target=data.x[data.scale0_sampling_index], attn_mask=attn_mask)
 
 
 class CrossAttentionYoda(torch.nn.Module):
@@ -241,7 +236,7 @@ class CrossAttentionYoda(torch.nn.Module):
             channels=num_latent_channels,
             num_heads=num_attn_heads,
             dropout_prob=dropout_probability,
-            pos_enc_base=positional_encoding_base if use_positional_encoding else None
+            pos_encoding_base=positional_encoding_base if use_positional_encoding else None
         )
 
         self.output_layer = Linear(num_latent_channels, num_output_channels)

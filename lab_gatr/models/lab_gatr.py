@@ -14,6 +14,9 @@ from lab_gatr.nn.blocks.cross_attention.geometric_algebra import CrossAttentionB
 from gatr.utils.tensors import construct_reference_multivector
 
 
+positional_encoding_base = 1e4
+
+
 class LaBGATr(torch.nn.Module):
 
     def __init__(
@@ -25,9 +28,13 @@ class LaBGATr(torch.nn.Module):
         num_latent_channels=None,
         use_class_token: bool = False,
         dropout_probability=None,
-        pooling_mode: str = 'cross_attention'
+        pooling_mode: str = 'cross_attention',
+        use_positional_encoding: bool = False
     ):
         super().__init__()
+
+        if pooling_mode == 'message_passing' and use_positional_encoding:
+            raise NotImplementedError
 
         num_latent_channels = num_latent_channels or d_model
 
@@ -45,7 +52,8 @@ class LaBGATr(torch.nn.Module):
                     d_model,
                     num_attn_heads,
                     num_latent_channels=num_latent_channels,
-                    dropout_probability=dropout_probability
+                    dropout_probability=dropout_probability,
+                    use_positional_encoding=use_positional_encoding
                 )
 
         self.gatr = gatr.GATr(
@@ -55,7 +63,11 @@ class LaBGATr(torch.nn.Module):
             in_s_channels=geometric_algebra_interface.num_input_scalars,
             out_s_channels=geometric_algebra_interface.num_input_scalars,
             hidden_s_channels=4 * num_latent_channels,
-            attention=gatr.SelfAttentionConfig(num_heads=num_attn_heads),
+            attention=gatr.SelfAttentionConfig(
+                num_heads=num_attn_heads,
+                pos_encoding=use_positional_encoding,
+                pos_enc_base=positional_encoding_base
+            ),
             mlp=gatr.MLPConfig(),
             num_blocks=num_blocks,
             dropout_prob=dropout_probability
@@ -274,7 +286,8 @@ class CrossAttentionTokeniser(Tokeniser):
         d_model: int,
         num_attn_heads: int,
         num_latent_channels=None,
-        dropout_probability=None
+        dropout_probability=None,
+        use_positional_encoding: bool = False
     ):
         super().__init__(geometric_algebra_interface, d_model)  # dummy init
         delattr(self, "point_cloud_pooling")
@@ -298,7 +311,8 @@ class CrossAttentionTokeniser(Tokeniser):
             num_output_scalars=num_input_scalars,
             num_attn_heads=num_attn_heads,
             num_latent_channels=num_latent_channels,
-            dropout_probability=dropout_probability
+            dropout_probability=dropout_probability,
+            use_positional_encoding=use_positional_encoding
         )
 
         # Number of latent channels has to be even for "gatr" geometric bilinear layer
@@ -356,7 +370,8 @@ class CrossAttentionHatchling(torch.nn.Module):
         num_output_scalars,
         num_attn_heads: int,
         num_latent_channels=None,
-        dropout_probability=None
+        dropout_probability=None,
+        use_positional_encoding: bool = False
     ):
         super().__init__()
 
@@ -387,7 +402,11 @@ class CrossAttentionHatchling(torch.nn.Module):
         self.block = CrossAttentionBlock(
             mv_channels=num_latent_channels,
             s_channels=num_output_scalars,
-            attention=gatr.SelfAttentionConfig(num_heads=num_attn_heads),
+            attention=gatr.SelfAttentionConfig(
+                num_heads=num_attn_heads,
+                pos_encoding=use_positional_encoding,
+                pos_enc_base=positional_encoding_base
+            ),
             mlp=gatr.MLPConfig(),
             dropout_prob=dropout_probability
         )
