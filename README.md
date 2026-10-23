@@ -11,11 +11,11 @@ We recommend creating a new Anaconda environment
 conda create --name lab-gatr python=3.12
 conda activate lab-gatr
 ```
-Next, install PyTorch, PyG and xFormers (CUDA 12.8)
+Next, install PyTorch, xFormers and PyG (CUDA 13.0)
 ```shell
-pip install torch==2.8 --index-url https://download.pytorch.org/whl/cu128
-pip install torch_geometric torch_scatter torch_cluster --find-links https://data.pyg.org/whl/torch-2.8.0+cu128.html
-pip install xformers==0.0.32.post2 --index-url https://download.pytorch.org/whl/cu128
+pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cu130
+pip install xformers --index-url https://download.pytorch.org/whl/cu130
+pip install torch_geometric pyg_lib torch_scatter -f https://data.pyg.org/whl/torch-2.10.0+cu130.html
 ```
 You can now install `gatr` ([GitHub](https://github.com/Qualcomm-AI-research/geometric-algebra-transformer)) via
 ```shell

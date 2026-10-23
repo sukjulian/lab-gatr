@@ -1,7 +1,7 @@
 import torch_geometric as pyg
 from .data import Data
 import torch
-from torch_cluster import fps, knn
+from pyg_lib.ops import fps, knn
 
 
 class PointCloudPoolingScales():
