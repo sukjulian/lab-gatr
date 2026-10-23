@@ -13,14 +13,14 @@ dependencies = [
     "torch",
     "xformers",
     "torch_geometric",
+    "pyg_lib",
     "torch_scatter",
-    "torch_cluster",
     "gatr"
 ]
 description = "Geometric algbera transformers for large biomedical surface and volume meshes"
 license = {text = "MIT License"}
 name = "lab_gatr"
-version = "0.6.0"
+version = "0.6.1"
 
 [project.urls]
 homepage = "https://github.com/sukjulian/lab-gatr"
